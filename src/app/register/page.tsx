@@ -33,7 +33,10 @@ export default function Register() {
     })
 
     if (response.ok) router.push("/dashboard")
-    else setError((await response.json()).error)
+    else {
+      const payload = await response.json().catch(() => null)
+      setError(payload?.error ?? "Registration failed. Please try again.")
+    }
   }
 
   return (

@@ -9,10 +9,10 @@ type AuthShellProps = {
 
 export function AuthShell({ children }: AuthShellProps) {
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-4 sm:px-6 lg:h-[calc(100dvh-4rem)] lg:py-4">
-      <Card className="w-full max-w-6xl overflow-hidden border bg-card py-0 shadow-sm lg:h-full lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(26rem,1.05fr)]">
+    <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-4 sm:px-6 lg:min-h-[calc(100dvh-4rem)] lg:py-6">
+      <Card className="w-full max-w-6xl overflow-hidden border bg-card py-0 shadow-sm lg:h-[min(760px,calc(100dvh-6rem))] lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(26rem,1.05fr)]">
         <div
-          className="hidden h-full border-r bg-muted/45 p-8 lg:block"
+          className="hidden h-full border-r bg-muted/45 p-6 lg:block"
           aria-hidden="true"
         >
           <AuthGlobe />

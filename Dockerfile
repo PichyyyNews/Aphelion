@@ -2,7 +2,7 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --no-audit --no-fund
 FROM node:20-alpine AS builder
 RUN apk add --no-cache openssl
 WORKDIR /app
