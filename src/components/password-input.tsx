@@ -1,0 +1,3 @@
+'use client';
+import {useState} from 'react'; import {EyeIcon,EyeOffIcon} from 'lucide-react'; import {Input} from '@/components/ui/input'; import {Button} from '@/components/ui/button';
+export function PasswordInput(props:React.ComponentProps<typeof Input>){const [shown,setShown]=useState(false);return <div className="relative"><Input {...props} type={shown?'text':'password'} className="pr-10"/><Button type="button" variant="ghost" size="icon-sm" className="absolute right-1 top-1/2 -translate-y-1/2" aria-label={shown?'Hide password':'Show password'} onClick={()=>setShown(!shown)}>{shown?<EyeOffIcon aria-hidden="true"/>:<EyeIcon aria-hidden="true"/>}</Button></div>}

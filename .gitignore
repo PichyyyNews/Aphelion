@@ -1,0 +1,20 @@
+node_modules/
+.next/
+.npm-cache/
+.tmp/
+.env
+.env.*
+!.env.example
+
+# Prisma local database/runtime files
+prisma/*.db
+prisma/*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/

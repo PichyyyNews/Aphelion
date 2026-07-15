@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+enum Role {
+  USER
+  ADMIN
+}
+enum UserStatus {
+  ACTIVE
+  BANNED
+  PENDING
+}
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String?
+  name String?
+  role Role @default(USER)
+  status UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  auditLogs AuditLog[]
+}
+model Account {
+  id String @id @default(cuid())
+  userId String
+  provider String
+  providerAccountId String
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  @@unique([provider, providerAccountId])
+}
+model Session {
+  id String @id @default(cuid())
+  token String @unique
+  userId String
+  expires DateTime
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+}
+model SystemSetting {
+  id String @id @default(cuid())
+  key String @unique
+  value String
+  isSecret Boolean @default(false)
+  category String
+  updatedAt DateTime @updatedAt
+}
+model AuditLog {
+  id String @id @default(cuid())
+  userId String?
+  action String
+  metadata Json?
+  createdAt DateTime @default(now())
+  user User? @relation(fields:[userId], references:[id])
+}
