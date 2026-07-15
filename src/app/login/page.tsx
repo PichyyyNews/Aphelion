@@ -1,3 +1,78 @@
-'use client';
-import {useState} from 'react'; import {useRouter} from 'next/navigation'; import {Button} from '@/components/ui/button'; import {Card,CardContent,CardDescription,CardFooter,CardHeader,CardTitle} from '@/components/ui/card'; import {Field,FieldError,FieldGroup,FieldLabel} from '@/components/ui/field'; import {Input} from '@/components/ui/input'; import {PasswordInput} from '@/components/password-input';
-export default function Login(){const[email,setEmail]=useState(''),[password,setPassword]=useState(''),[error,setError]=useState('');const r=useRouter();async function submit(e:React.FormEvent){e.preventDefault();const x=await fetch('/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});if(x.ok)r.push('/dashboard');else setError((await x.json()).error)}return <main className="mx-auto flex max-w-md px-5 py-16"><form className="w-full" onSubmit={submit}><Card><CardHeader><p className="text-xs font-medium tracking-[0.18em] text-muted-foreground">WELCOME BACK</p><CardTitle>Sign in to Aphelion</CardTitle><CardDescription>Use email/password or a configured provider.</CardDescription></CardHeader><CardContent><FieldGroup><Field><FieldLabel htmlFor="email">Email</FieldLabel><Input id="email" type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></Field><Field data-invalid={!!error}><FieldLabel htmlFor="password">Password</FieldLabel><PasswordInput id="password" value={password} onChange={e=>setPassword(e.target.value)} required aria-invalid={!!error}/>{error&&<FieldError>{error}</FieldError>}</Field></FieldGroup></CardContent><CardFooter className="flex-col items-stretch gap-3"><Button type="submit">Sign in</Button><div className="grid grid-cols-2 gap-2"><a className="inline-flex h-8 items-center justify-center rounded-lg border text-sm font-medium hover:bg-muted" href="/api/auth/oauth/github">GitHub</a><a className="inline-flex h-8 items-center justify-center rounded-lg border text-sm font-medium hover:bg-muted" href="/api/auth/oauth/google">Google</a></div><p className="text-center text-sm text-muted-foreground">No account? <a className="underline underline-offset-4" href="/register">Create one</a></p></CardFooter></Card></form></main>}
+"use client"
+
+import { useState } from "react"
+import { FaGithub } from "react-icons/fa"
+import { FcGoogle } from "react-icons/fc"
+import { CiMail } from "react-icons/ci"
+import { useRouter } from "next/navigation"
+
+import { AuthShell } from "@/components/auth-shell"
+import { PasswordInput } from "@/components/password-input"
+import { Button } from "@/components/ui/button"
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+
+export default function Login() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const router = useRouter()
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault()
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (response.ok) router.push("/dashboard")
+    else setError((await response.json()).error)
+  }
+
+  return (
+    <AuthShell>
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
+        <a href="/" className="mb-5 flex w-full justify-center">
+          <img className="size-14 dark:invert" src="/logo.svg" alt="Aphelion home" />
+        </a>
+        <div className="mb-6 text-center">
+          <h1 className="text-balance text-3xl font-semibold tracking-tight">Welcome back</h1>
+          <p className="mt-2 text-pretty text-muted-foreground">Sign in to continue to your Aphelion account.</p>
+        </div>
+        <form onSubmit={submit}>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <div className="relative">
+                <CiMail className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Input id="email" type="email" autoComplete="email" className="pl-10" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              </div>
+            </Field>
+            <Field data-invalid={!!error}>
+              <div className="flex items-center justify-between gap-3">
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <a className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground" href="/login">Forgot password?</a>
+              </div>
+              <PasswordInput id="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required aria-invalid={!!error} />
+              {error && <FieldError>{error}</FieldError>}
+            </Field>
+            <Button type="submit" className="w-full">Sign in</Button>
+            <FieldSeparator className="-my-1 text-xs [&>[data-slot=separator]]:bg-border/60">or continue with</FieldSeparator>
+            <div className="grid grid-cols-2 gap-3">
+              <a className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border text-sm font-medium hover:bg-muted" href="/api/auth/oauth/github">
+                <FaGithub aria-hidden="true" />
+                GitHub
+              </a>
+              <a className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border text-sm font-medium hover:bg-muted" href="/api/auth/oauth/google">
+                <FcGoogle aria-hidden="true" />
+                Google
+              </a>
+            </div>
+          </FieldGroup>
+        </form>
+        <p className="mt-8 text-center text-sm text-muted-foreground">New to Aphelion? <a className="font-medium text-foreground underline underline-offset-4" href="/register">Create your account</a></p>
+      </div>
+    </AuthShell>
+  )
+}

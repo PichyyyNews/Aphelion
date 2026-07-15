@@ -1,9 +1,37 @@
-import './globals.css';
-import type { ReactNode } from 'react';
-import { ThemeToggle } from '@/components/theme-toggle';
+import "./globals.css"
+import type { ReactNode } from "react"
+import Script from "next/script"
 
-export const metadata = { title: 'Aphelion', description: 'Secure identity platform' };
+import { ThemeToggle } from "@/components/theme-toggle"
+
+export const metadata = { title: "Aphelion", description: "Secure identity platform" }
+
+const setInitialTheme = `
+  try {
+    const savedTheme = localStorage.getItem("theme");
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", (savedTheme === "dark" || savedTheme === "light" ? savedTheme : systemTheme) === "dark");
+  } catch {
+    document.documentElement.classList.remove("dark");
+  }
+`
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return <html lang="en" suppressHydrationWarning><body><div className="min-h-screen bg-background"><nav className="flex h-16 items-center justify-between border-b px-5 sm:px-8"><a className="flex items-center gap-3 font-semibold tracking-tight" href="/"><img className="size-7 dark:invert" src="/logo.svg" alt="Aphelion" />Aphelion</a><ThemeToggle /></nav>{children}</div></body></html>;
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Script id="set-initial-theme" strategy="beforeInteractive">{setInitialTheme}</Script>
+        <div className="min-h-screen bg-background">
+          <nav className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-5 sm:px-8">
+            <a className="flex items-center gap-3 font-semibold tracking-tight" href="/">
+              <img className="size-7 dark:invert" src="/logo.svg" alt="Aphelion" />
+              Aphelion
+            </a>
+            <ThemeToggle />
+          </nav>
+          {children}
+        </div>
+      </body>
+    </html>
+  )
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Icons CI"
+  short_description: "Use only react-icons CI icons in Aphelion UI."
+  default_prompt: "Use $react-icons-ci when adding or changing an icon in Aphelion."
