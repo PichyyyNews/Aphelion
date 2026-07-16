@@ -2,14 +2,11 @@ FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-# Copy go.mod
-COPY go.mod ./
-
-# Download dependencies and generate go.sum
-RUN go mod tidy
-
-# Copy source code
+# Copy source code (including go.mod)
 COPY . .
+
+# Download dependencies and generate go.sum based on the source code
+RUN go mod tidy
 
 # Build application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/api
