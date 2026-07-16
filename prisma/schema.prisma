@@ -11,21 +11,46 @@ enum Role {
 }
 enum UserStatus {
   ACTIVE
+  SUSPENDED
   BANNED
   PENDING
+}
+enum LoginActivityType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  REGISTER
 }
 model User {
   id String @id @default(cuid())
   email String @unique
   password String?
   name String?
+  bio String?
+  avatarUrl String?
   role Role @default(USER)
   status UserStatus @default(ACTIVE)
+  emailVerified Boolean @default(false)
+  lastLoginAt DateTime?
+  failedLoginCount Int @default(0)
+  lastFailedLoginAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sessions Session[]
   accounts Account[]
-  auditLogs AuditLog[]
+  auditLogs AuditLog[] @relation("AuditActor")
+  targetedAuditLogs AuditLog[] @relation("AuditTarget")
+  loginActivities LoginActivity[]
+  following Follow[] @relation("Following")
+  followers Follow[] @relation("Followers")
+}
+model Follow {
+  followerId String
+  followingId String
+  createdAt DateTime @default(now())
+  follower User @relation("Following", fields:[followerId], references:[id], onDelete:Cascade)
+  following User @relation("Followers", fields:[followingId], references:[id], onDelete:Cascade)
+  @@id([followerId, followingId])
+  @@index([followingId])
 }
 model Account {
   id String @id @default(cuid())
@@ -52,9 +77,20 @@ model SystemSetting {
 }
 model AuditLog {
   id String @id @default(cuid())
-  userId String?
+  adminId String? @map("userId")
+  targetUserId String?
   action String
   metadata Json?
   createdAt DateTime @default(now())
-  user User? @relation(fields:[userId], references:[id])
+  admin User? @relation("AuditActor", fields:[adminId], references:[id])
+  targetUser User? @relation("AuditTarget", fields:[targetUserId], references:[id])
+}
+model LoginActivity {
+  id String @id @default(cuid())
+  userId String?
+  type LoginActivityType
+  ip String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user User? @relation(fields:[userId], references:[id], onDelete:SetNull)
 }

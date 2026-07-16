@@ -1,11 +1,11 @@
 ---
 name: react-icons-ci
-description: "Enforce Aphelion's icon standard: use only Circum Icons from react-icons/ci when adding, changing, reviewing, or migrating UI icons in this project. Use for buttons, navigation, inputs, status feedback, and any icon import."
+description: "Guide icon selection in Aphelion UI work. Prefer Circum Icons from react-icons/ci, while allowing a suitable installed icon library when Circum lacks the needed symbol. Use when adding, changing, reviewing, or migrating UI icons."
 ---
 
 # React Icons CI for Aphelion
 
-Use only icons exported by `react-icons/ci`. Do not introduce or import icons from `lucide-react`, another `react-icons` family, inline SVG, emoji, or a different icon package for application UI.
+Prefer Circum Icons from `react-icons/ci` for application UI. Use another installed icon library only when Circum lacks a clear, conventional symbol or the current component already uses that library.
 
 ## Setup
 
@@ -15,7 +15,7 @@ Ensure the dependency exists before using it:
 npm install react-icons
 ```
 
-Import each icon directly from the allowed family:
+Prefer importing directly from Circum:
 
 ```tsx
 import { CiSearch, CiSettings, CiUser } from "react-icons/ci"
@@ -36,7 +36,7 @@ Use the icon component directly. Do not wrap it in a custom SVG component or re-
 | Data actions | An explicit, familiar action icon with a text label when space permits | `CiEdit`, `CiTrash`, `CiExport`, `CiImport`, `CiSaveDown1` |
 | External/contact links | The destination's CI icon only when available; otherwise use text | `CiMail`, `CiPhone`, `CiGlobe` |
 
-If no CI icon communicates the meaning clearly, use a text label. Do not substitute an icon from another library.
+If no CI icon communicates the meaning clearly, use an installed library with a clear equivalent, or use a text label. Keep one icon family within a single component unless interoperability requires otherwise.
 
 ## Implementation patterns
 
@@ -99,5 +99,6 @@ import { CiCircleCheck } from "react-icons/ci"
 - Add `aria-label` to every icon-only interactive control; use `aria-hidden="true"` for decorative icons.
 - Keep icon size consistent with the surrounding component. Do not add arbitrary per-icon sizing classes inside shared UI components.
 - Use one icon to express one action. Do not decorate headings, cards, or every navigation item without a usability reason.
-- When editing an existing icon import, migrate it to an equivalent `react-icons/ci` icon when one is clear. Otherwise replace it with accessible text rather than another icon library.
+- When editing an existing icon import, keep the component's current icon family unless there is a clear reason to standardize it on Circum.
+- Prefer Circum for new components, but do not block a suitable installed library solely because Circum has no equivalent icon.
 - Do not alter brand logos, user-uploaded assets, illustrations, or favicon files; this rule applies to application UI icons.

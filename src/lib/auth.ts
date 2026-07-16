@@ -1,4 +1,7 @@
 import {cookies} from 'next/headers'; import {db} from './db'; import {SignJWT,jwtVerify} from 'jose';
 const secret=new TextEncoder().encode(process.env.AUTH_SECRET||'dev-secret-change-me');
-export async function createSession(userId:string){const token=await new SignJWT({userId}).setProtectedHeader({alg:'HS256'}).setExpirationTime('7d').sign(secret);await db.session.create({data:{token,userId,expires:new Date(Date.now()+604800000)}});return token;}
-export async function getUser(){const token=cookies().get('aphelion_session')?.value;if(!token)return null;try{const {payload}=await jwtVerify(token,secret);return db.user.findUnique({where:{id:String(payload.userId)}})}catch{return null;}}
+export async function createSession(user:{id:string;role:string}){const token=await new SignJWT({userId:user.id,role:user.role}).setProtectedHeader({alg:'HS256'}).setExpirationTime('7d').sign(secret);await db.session.create({data:{token,userId:user.id,expires:new Date(Date.now()+604800000)}});return token;}
+export async function getUser(){const token=cookies().get('aphelion_session')?.value;if(!token)return null;try{const {payload}=await jwtVerify(token,secret);const session=await db.session.findUnique({where:{token}});if(!session||session.expires<new Date())return null;return db.user.findUnique({where:{id:String(payload.userId)}})}catch{return null;}}
+export async function createAdminAccessToken(userId:string){return new SignJWT({userId,scope:'admin-panel'}).setProtectedHeader({alg:'HS256'}).setExpirationTime('30m').sign(secret)}
+export async function hasAdminAccess(userId:string){const token=cookies().get('aphelion_admin_access')?.value;if(!token)return false;try{const {payload}=await jwtVerify(token,secret);return payload.userId===userId&&payload.scope==='admin-panel'}catch{return false}}
+export async function requireAdmin(){const user=await getUser();if(!user||user.role!=='ADMIN'||!(await hasAdminAccess(user.id)))return null;return user}

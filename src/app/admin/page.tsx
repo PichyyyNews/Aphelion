@@ -1,6 +1,0 @@
-import { redirect } from 'next/navigation';
-import { getUser } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-export default async function Admin(){const u=await getUser();if(!u||u.role!=='ADMIN')redirect('/dashboard');const users=await db.user.findMany({orderBy:{createdAt:'desc'}});return <main className="mx-auto max-w-5xl px-5 py-16 sm:px-8"><Card><CardHeader><p className="text-xs font-medium tracking-[0.18em] text-muted-foreground">ADMIN CONTROL</p><CardTitle>Users & access</CardTitle><CardDescription>Current identities registered in Aphelion.</CardDescription></CardHeader><CardContent><div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-b text-left text-muted-foreground"><tr><th className="pb-3 font-medium">Email</th><th className="pb-3 font-medium">Role</th><th className="pb-3 font-medium">Status</th></tr></thead><tbody>{users.map(x=><tr className="border-b last:border-0" key={x.id}><td className="py-3">{x.email}</td><td className="py-3">{x.role}</td><td className="py-3">{x.status}</td></tr>)}</tbody></table></div></CardContent></Card></main>}
