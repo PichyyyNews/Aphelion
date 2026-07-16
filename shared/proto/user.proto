@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "aphelion/shared/proto/user";
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc VerifyUser(VerifyUserRequest) returns (VerifyUserResponse);
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+  string status = 5;
+}
+
+message VerifyUserRequest {
+  string token = 1;
+}
+
+message VerifyUserResponse {
+  bool valid = 1;
+  string userId = 2;
+  string role = 3;
+}

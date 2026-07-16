@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package activity;
+
+option go_package = "aphelion/shared/proto/activity";
+
+service ActivityService {
+  rpc LogActivity(LogActivityRequest) returns (LogActivityResponse);
+  rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
+}
+
+message LogActivityRequest {
+  string userId = 1;
+  string type = 2;
+  string metadata = 3;
+}
+
+message LogActivityResponse {
+  bool success = 1;
+  string activityId = 2;
+}
+
+message GetFeedRequest {
+  string userId = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message GetFeedResponse {
+  repeated ActivityItem items = 1;
+  int32 total = 2;
+}
+
+message ActivityItem {
+  string activityId = 1;
+  string userId = 2;
+  string type = 3;
+  string metadata = 4;
+  string createdAt = 5;
+}

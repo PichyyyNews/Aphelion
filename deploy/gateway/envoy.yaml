@@ -1,0 +1,160 @@
+static_resources:
+  listeners:
+    - name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: local_service
+                      domains: ["*"]
+                      routes:
+                        # 1. Public user-auth APIs
+                        - match:
+                            prefix: "/api/auth/login"
+                          route:
+                            cluster: svc-user-auth
+                        - match:
+                            prefix: "/api/auth/register"
+                          route:
+                            cluster: svc-user-auth
+                        - match:
+                            prefix: "/api/auth/oauth"
+                          route:
+                            cluster: svc-user-auth
+                        
+                        # 2. Private profile & admin APIs (Envoy validates JWT via filters below)
+                        - match:
+                            prefix: "/api/profile"
+                          route:
+                            cluster: svc-user-auth
+                        - match:
+                            prefix: "/api/admin"
+                          route:
+                            cluster: svc-user-auth
+
+                        # 3. Activity feed API
+                        - match:
+                            prefix: "/api/feed"
+                          route:
+                            cluster: svc-activity-feed
+
+                        # 4. Notification API
+                        - match:
+                            prefix: "/api/notifications"
+                          route:
+                            cluster: svc-notification
+
+                        # 5. Fallback: all web pages and static assets to next.js frontend
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: web-frontend
+                http_filters:
+                  # JWT Authn Filter (verifies session cookie & propagates claims)
+                  - name: envoy.filters.http.jwt_authn
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+                      providers:
+                        aphelion_jwt:
+                          issuer: "aphelion"
+                          from_cookies:
+                            - aphelion_session
+                          local_jwks:
+                            inline_string: |
+                              {
+                                "keys": [
+                                  {
+                                    "kty": "oct",
+                                    "alg": "HS256",
+                                    "k": "ZGV2LXNlY3JldC1jaGFuZ2UtbWU"
+                                  }
+                                ]
+                              }
+                          claim_to_headers:
+                            - header_name: "x-user-id"
+                              claim_name: "userId"
+                            - header_name: "x-user-role"
+                              claim_name: "role"
+                      rules:
+                        - match:
+                            prefix: "/api/profile"
+                          requires:
+                            provider_name: "aphelion_jwt"
+                        - match:
+                            prefix: "/api/admin"
+                          requires:
+                            provider_name: "aphelion_jwt"
+                  
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+    - name: web-frontend
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: web-frontend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: web-frontend
+                      port_value: 3000
+
+    - name: svc-user-auth
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: svc-user-auth
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: svc-user-auth
+                      port_value: 3001
+
+    - name: svc-activity-feed
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: svc-activity-feed
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: svc-activity-feed
+                      port_value: 3002
+
+    - name: svc-notification
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: svc-notification
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: svc-notification
+                      port_value: 8081
