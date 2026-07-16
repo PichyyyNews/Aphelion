@@ -1,5 +1,8 @@
 FROM golang:1.22-alpine AS builder
 
+# Enable automatic toolchain downloads for newer Go versions
+ENV GOTOOLCHAIN=auto
+
 WORKDIR /app
 
 # Copy source code (including go.mod)

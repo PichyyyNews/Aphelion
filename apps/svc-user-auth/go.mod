@@ -10,3 +10,6 @@ require (
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.10
 )
+
+exclude github.com/rogpeppe/go-internal v1.15.0
+exclude github.com/rogpeppe/go-internal v1.14.0
